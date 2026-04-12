@@ -22,3 +22,26 @@ Python es un lenguaje de programación multiparadigma de alto nivel interpretado
 Es una librería de software para procesamiento de lenguajes naturales, reconocimiento de nombres de entidades, análisis de redes, visualización de datos, análisis, visual analysis, análisis de contenidos, enriching, anotación desarrollado por Matt Honnibal y programado en lenguaje Python.
 
 Es necesario una herramienta NLP para la comprensión de textos, en nuestro caso son textos del BOE y BOP escritos en diferentes idiomas.
+
+spaCy tiene soporte para múltiples idiomas como inglés, español y catalán, pero no para todos aquellos (hasta la fecha) que se encuentran en el BOE como pueden ser: gallego, euskera o valenciano...
+
+En la página se encuentra un /quickstart/ que indica cómo instalar la librería y qué paquete de idioma utilizar, uno se basa en la eficiencia y el otro en la precisión.
+
+#+begin_src python
+  # $ python -m spacy download ca_core_news_sm
+
+  import spacy
+
+
+  # Precisión
+  # nlp = spacy.load("ca_core_news_trf")
+  # import ca_core_news_trf
+
+  # Módulo de eficiencia
+  nlp = spacy.load("ca_core_news_sm")
+  import ca_core_news_sm
+  nlp = ca_core_news_sm.load()
+
+  doc = nlp("Això és una frase.")
+  print([(w.text, w.pos_) for w in doc])
+#+end_src
