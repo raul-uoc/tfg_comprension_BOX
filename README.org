@@ -1,0 +1,24 @@
+* Dependencias e instalación
+El siguiente proyecto depende de varias herramientas y librerías *libres* y *gratuitas*.
+
+** GNU Guile
+Gnu Guile es un intérprete del proyecto GNU, e implementa un lenguaje de programación basado en Scheme. Se caracteriza por su facilidad de utilizar herramientas y librerías creadas en C o C++, exportación de funciones y tipos.
+
+También ofrece herramientas de manipulación y procesamiento de XML.
+
+Para instalar GUILE basta con seguir las instrucciones de la página oficial.
+
+*** Curl
+Curl es una herramienta que permite la transferencia de datos desde un servidor utilizando URLs, soporta un gran de número de protocolos.
+
+Utilizaremos una librería-envoltorio que permite hace uso de la librería C de Curl con Gnu Guile.
+
+https://github.com/spk121/guile-curl.
+
+** Python
+Python es un lenguaje de programación multiparadigma de alto nivel interpretado cuya filosofía hace hincapié en la legibilidad de su código.
+
+*** spaCy
+Es una librería de software para procesamiento de lenguajes naturales, reconocimiento de nombres de entidades, análisis de redes, visualización de datos, análisis, visual analysis, análisis de contenidos, enriching, anotación desarrollado por Matt Honnibal y programado en lenguaje Python.
+
+Es necesario una herramienta NLP para la comprensión de textos, en nuestro caso son textos del BOE y BOP escritos en diferentes idiomas.
