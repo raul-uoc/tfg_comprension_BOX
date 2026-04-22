@@ -1,16 +1,12 @@
-(setlocale LC_ALL "")
-
-(set-port-encoding! (current-input-port) "UTF-8")
-(set-port-encoding! (current-output-port) "UTF-8")
-
 (use-modules (sxml ssax)
 	     (sxml xpath)
 	     (curl)
 	     (sxml simple)
 	     (rnrs bytevectors)
-	     (ice-9 iconv))
-
-(use-modules (web client))
+	     (ice-9 iconv)
+	     (srfi srfi-11)
+	     (web client)
+	     (ice-9 match))
 
 (define (descargar-peticion lema)
   (let* ((handle (curl-easy-init)))
@@ -28,6 +24,8 @@
    (string->bytevector the-string "ISO-8859-1")
    "UTF-8"))
 
+(define (last-elem list) (car (reverse list)))
+
 (define (extraer-articulo pagina-bruta)
   (let* ((puro-articulo (match:substring (string-match "<article.*?</article>" pagina-bruta)))
 	 (borra-doble-span (regexp-substitute/global #f "</span></span>" puro-articulo
@@ -42,8 +40,15 @@
 (define el-articulo (extraer-articulo pagina-limpia))
 (define el-s-articulo (xml->sxml el-articulo))
 
+(define (obtener-definiciones s-articulo)
+  (let* ((campo-definiciones ((sxpath  '(// (span (@ class (equal? "field-name-field-definicion") ) ))) s-articulo))
+	 (las-definiciones ((select-kids string?) campo-definiciones)))
+    las-definiciones))
+
 ((sxpath  '(// (span (@ class (equal? "field-name-field-definicion") ) ))) el-s-articulo)
+((sxpath  '(// (div (@ class (equal? "cuerpo-lema") ) ))) el-s-articulo)
+((sxpath  '(// (span (@ class (equal? "field-name-field-definicion") ) ))) el-s-articulo)
+((sxpath  '(// (div (@ class (equal? "field-name-field-sublema") ) ))) el-s-articulo)
 
-
-
-
+((sxpath  '(// (div (@ class (equal? "field-name-field-sublema"))
+		    (span (@ (class (equal? "sublema1"))))))) el-s-articulo)
