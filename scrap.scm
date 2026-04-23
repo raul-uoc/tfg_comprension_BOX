@@ -6,7 +6,8 @@
 	     (ice-9 iconv)
 	     (srfi srfi-11)
 	     (web client)
-	     (ice-9 match))
+	     (ice-9 match)
+	     (ice-9 pretty-print))
 
 (define (descargar-peticion lema)
   (let* ((handle (curl-easy-init)))
@@ -48,7 +49,68 @@
 ((sxpath  '(// (span (@ class (equal? "field-name-field-definicion") ) ))) el-s-articulo)
 ((sxpath  '(// (div (@ class (equal? "cuerpo-lema") ) ))) el-s-articulo)
 ((sxpath  '(// (span (@ class (equal? "field-name-field-definicion") ) ))) el-s-articulo)
-((sxpath  '(// (div (@ class (equal? "field-name-field-sublema") ) ))) el-s-articulo)
+
+((sxpath  '(// (div (@ class (equal? "field-name-field-sublema"))))) el-s-articulo)
 
 ((sxpath  '(// (div (@ class (equal? "field-name-field-sublema"))
 		    (span (@ (class (equal? "sublema1"))))))) el-s-articulo)
+
+
+((sxpath  '(// (div (@ class (equal? "field-name-field-sublema"))))) el-s-articulo)
+
+
+
+((node-join
+  (sxpath '(// (div (@ class (equal? "field-name-field-sublema")))))
+  (sxpath '(// (href)))) el-s-articulo)
+;; ((href "/lema/poder-adquisitivo")
+;;  (href "/lema/poder-constituyente")
+;;  (href "/lema/poder-constituyente-constituido-o-poder-constituyente-derivado")
+;;  (href "/lema/poder-de-coacción")
+;;  (href "/lema/poder-de-decisión-jurisdiccional")
+;;  (href "/lema/poder-de-dirección")
+;;  (href "/lema/poder-de-disposición")
+;;  (href "/lema/poder-de-ejecución-jurisdiccional")
+;;  (href "/lema/poder-de-instrumentación-jurisdiccional") ...
+
+((sxpath
+  '(// (div (@ class (equal? "field-name-field-sublema"))
+	    (// (@ (href)))))) el-s-articulo)
+;; ((div (@ (class "field-name-field-sublema"))
+;;       (span (@ (class "sublema1"))
+;;             (a (@ (href "/lema/poder-adquisitivo")) "poder adquisitivo")))
+;;  (div (@ (class "field-name-field-sublema"))
+;;       (span (@ (class "sublema1"))
+;;             (a (@ (href "/lema/poder-constituyente")) "poder constituyente"))
+;;       (div (@ (class "field-name-field-sublema"))
+;;            (span (@ (class "sublema2"))
+;;                  (a (@ (href "/lema/poder-constituyente-constituido-o-poder-constituyente-derivado"))
+;;                     "poder constituyente constituido "
+;;                     (span (@ (class "o")) "o")
+;;                     " poder constituyente derivado"))))
+ 
+
+((node-closure (node-typeof? 'div ))
+ ((sxpath  '(// (div (@ class (equal? "field-name-field-sublema"))))) el-s-articulo))
+;; ((div (@ (class "field-name-field-sublema"))
+;;       (span (@ (class "sublema2"))
+;;             (a (@ (href "/lema/poder-constituyente-constituido-o-poder-constituyente-derivado"))
+;;                "poder constituyente constituido "
+;;                (span (@ (class "o")) "o")
+;;                " poder constituyente derivado")))
+;;  (div (@ (class "field-name-field-sublema"))
+;;       (span (@ (class "sublema2"))
+;;             (a (@ (href "/lema/poder-judicial-de-la-federación"))
+;;                "poder judicial de la Federación")))
+;;  (div (@ (class "field-name-field-sublema"))
+;;       (span (@ (class "sublema2"))
+;;             (a (@ (href "/lema/poder-judicial-de-la-nación"))
+;;                "poder judicial de la Nación")))
+;;  (div (@ (class "field-name-field-sublema"))
+;;       (span (@ (class "sublema2"))
+;;             (a (@ (href "/lema/poder-especial-para-pleitos"))
+;;                "poder especial para pleitos")))
+;;  (div (@ (class "field-name-field-sublema"))
+;;       (span (@ (class "sublema2"))
+;;             (a (@ (href "/lema/poder-general-para-pleitos"))
+;;                "poder general para pleitos"))))
