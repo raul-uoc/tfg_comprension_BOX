@@ -46,6 +46,8 @@
 	 (las-definiciones ((select-kids string?) campo-definiciones)))
     las-definiciones))
 
+
+
 ((sxpath  '(// (span (@ class (equal? "field-name-field-definicion") ) ))) el-s-articulo)
 ((sxpath  '(// (div (@ class (equal? "cuerpo-lema") ) ))) el-s-articulo)
 ((sxpath  '(// (span (@ class (equal? "field-name-field-definicion") ) ))) el-s-articulo)
@@ -55,14 +57,10 @@
 ((sxpath  '(// (div (@ class (equal? "field-name-field-sublema"))
 		    (span (@ (class (equal? "sublema1"))))))) el-s-articulo)
 
-
-((sxpath  '(// (div (@ class (equal? "field-name-field-sublema"))))) el-s-articulo)
-
-
-
 ((node-join
   (sxpath '(// (div (@ class (equal? "field-name-field-sublema")))))
-  (sxpath '(// (href)))) el-s-articulo)
+  (sxpath '(// (href))))
+ el-s-articulo)
 ;; ((href "/lema/poder-adquisitivo")
 ;;  (href "/lema/poder-constituyente")
 ;;  (href "/lema/poder-constituyente-constituido-o-poder-constituyente-derivado")
@@ -114,3 +112,90 @@
 ;;       (span (@ (class "sublema2"))
 ;;             (a (@ (href "/lema/poder-general-para-pleitos"))
 ;;                "poder general para pleitos"))))
+
+
+((node-or
+  (sxpath  '(// (div (@ class (equal? "field-name-field-rama")))))
+  (sxpath  '(// (div (@ class (equal? "field-name-field-definicion"))))))
+ el-s-articulo)
+
+
+
+((node-pos 2) ((sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
+	       el-s-articulo))
+
+((node-join
+  (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
+  (sxpath  '(// (span (@ class (equal? "field-name-field-rama"))))))
+ el-s-articulo)
+
+
+
+((node-or
+  (node-join
+   (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
+   (sxpath  '(// (span (@ class (equal? "field-name-field-rama"))))))
+  (node-join
+   (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
+   (sxpath  '(// (span (@ class (equal? "field-name-field-definicion")))))))
+ el-s-articulo)
+
+
+((node-pos 3)
+ ((node-or
+   (node-join
+    (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
+    (sxpath  '(// (span (@ class (equal? "field-name-field-rama"))))))
+   (node-join
+    (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
+    (sxpath  '(// (span (@ class (equal? "field-name-field-definicion")))))))
+  el-s-articulo))
+
+
+
+((node-reduce
+  (sxpath  '(// (span (@ class (equal? "field-name-field-rama")))))
+  (node-pos 2)) el-s-articulo)
+
+
+
+((node-or
+  (node-join
+   (node-reduce
+    (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
+    (node-pos 1))
+   (sxpath  '(// (span (@ class (equal? "field-name-field-rama"))))))
+  (node-join
+   (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
+   (sxpath  '(// (span (@ class (equal? "field-name-field-definicion")))))))
+ el-s-articulo)
+
+((node-join
+  (node-reduce
+   (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
+   (node-pos 1))
+  (node-reduce
+   (sxpath  '(// (span (@ class (equal? "field-name-field-rama")))))
+   (node-pos 1)))
+ el-s-articulo)
+
+((node-reduce
+   (sxpath  '(// (div (@ class (equal? "field-name-field-sublema")))))
+   (node-pos 18)) el-s-articulo)
+
+
+(define (obtener-sublema1-href-pos articulo pos)
+  ((node-join
+    (node-reduce
+     (sxpath '(// (div (@ class (equal? "field-name-field-sublema")))))
+     (node-pos pos))
+    (node-join
+     (node-reduce
+      (sxpath '(// (span (@ class (equal? "sublema1")))))
+      (node-pos 1))
+     (node-join
+      (node-reduce
+       (sxpath '(// (a)))
+       (node-pos 1))
+      (sxpath '(// (@ (href)))))))
+   articulo))
