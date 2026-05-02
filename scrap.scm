@@ -7,7 +7,8 @@
 	     (srfi srfi-11)
 	     (web client)
 	     (ice-9 match)
-	     (ice-9 pretty-print))
+	     (ice-9 pretty-print)
+	     (tirones))
 
 (define (descargar-peticion lema)
   (let* ((handle (curl-easy-init)))
@@ -28,18 +29,24 @@
 (define (last-elem list) (car (reverse list)))
 
 (define (extraer-articulo pagina-bruta)
-  (let* ((puro-articulo (match:substring (string-match "<article.*?</article>" pagina-bruta)))
-	 (borra-doble-span (regexp-substitute/global #f "</span></span>" puro-articulo
-						     'pre "</span>" 'post))
-	 (elimina-compartir (regexp-substitute/global #f "<div class=\"compartir\">.*?</dl>" borra-doble-span
-						      'pre "</dl>" 'post))
-	 (to-utf-8 (iso-to-utf-8 elimina-compartir)))
+  (let* ((puro-articulo		(match:substring (string-match "<article.*</article>" pagina-bruta)))
+	 (borra-doble-span	(regexp-substitute/global #f "</span></span>" puro-articulo
+							  'pre "</span>" 'post))
+	 (borra-script		(regexp-substitute/global #f "<script.*</script>" borra-doble-span
+							  'pre "" 'post))
+	 (borra-img		(regexp-substitute/global #f "<img[^>]*>" borra-script
+							  'pre "" 'post))
+	 (borra-nowrap		(regexp-substitute/global #f " nowrap " borra-img
+							  'pre "" 'post))
+	 (borra-styles		(regexp-substitute/global #f "style=\"[^\"]*\"" 
+							  borra-nowrap
+							  'pre "" 'post))
+	 ;(borra-comentarios	(regexp-substitute/global #f "<div class=\"field-name-field-comentario.*?</div>" borra-styles
+							  ;'pre "" 'post))
+	 (elimina-compartir	(regexp-substitute/global #f "<div class=\"compartir\">.*</dl>" borra-styles
+							  'pre "</dl>" 'post))
+	 (to-utf-8 		(iso-to-utf-8 elimina-compartir)))
     to-utf-8))
-
-(define el-poder (descargar-peticion "poder"))
-(define pagina-limpia (limpiar-pagina el-poder))
-(define el-articulo (extraer-articulo pagina-limpia))
-(define el-s-articulo (xml->sxml el-articulo))
 
 (define (obtener-definiciones s-articulo)
   (let* ((campo-definiciones ((sxpath  '(// (span (@ class (equal? "field-name-field-definicion") ) ))) s-articulo))
@@ -47,155 +54,35 @@
     las-definiciones))
 
 
-
-((sxpath  '(// (span (@ class (equal? "field-name-field-definicion") ) ))) el-s-articulo)
-((sxpath  '(// (div (@ class (equal? "cuerpo-lema") ) ))) el-s-articulo)
-((sxpath  '(// (span (@ class (equal? "field-name-field-definicion") ) ))) el-s-articulo)
-
-((sxpath  '(// (div (@ class (equal? "field-name-field-sublema"))))) el-s-articulo)
-
-((sxpath  '(// (div (@ class (equal? "field-name-field-sublema"))
-		    (span (@ (class (equal? "sublema1"))))))) el-s-articulo)
-
-((node-join
-  (sxpath '(// (div (@ class (equal? "field-name-field-sublema")))))
-  (sxpath '(// (href))))
- el-s-articulo)
-;; ((href "/lema/poder-adquisitivo")
-;;  (href "/lema/poder-constituyente")
-;;  (href "/lema/poder-constituyente-constituido-o-poder-constituyente-derivado")
-;;  (href "/lema/poder-de-coacción")
-;;  (href "/lema/poder-de-decisión-jurisdiccional")
-;;  (href "/lema/poder-de-dirección")
-;;  (href "/lema/poder-de-disposición")
-;;  (href "/lema/poder-de-ejecución-jurisdiccional")
-;;  (href "/lema/poder-de-instrumentación-jurisdiccional") ...
-
-((sxpath
-  '(// (div (@ class (equal? "field-name-field-sublema"))
-	    (// (@ (href)))))) el-s-articulo)
-;; ((div (@ (class "field-name-field-sublema"))
-;;       (span (@ (class "sublema1"))
-;;             (a (@ (href "/lema/poder-adquisitivo")) "poder adquisitivo")))
-;;  (div (@ (class "field-name-field-sublema"))
-;;       (span (@ (class "sublema1"))
-;;             (a (@ (href "/lema/poder-constituyente")) "poder constituyente"))
-;;       (div (@ (class "field-name-field-sublema"))
-;;            (span (@ (class "sublema2"))
-;;                  (a (@ (href "/lema/poder-constituyente-constituido-o-poder-constituyente-derivado"))
-;;                     "poder constituyente constituido "
-;;                     (span (@ (class "o")) "o")
-;;                     " poder constituyente derivado"))))
- 
-
-((node-closure (node-typeof? 'div ))
- ((sxpath  '(// (div (@ class (equal? "field-name-field-sublema"))))) el-s-articulo))
-;; ((div (@ (class "field-name-field-sublema"))
-;;       (span (@ (class "sublema2"))
-;;             (a (@ (href "/lema/poder-constituyente-constituido-o-poder-constituyente-derivado"))
-;;                "poder constituyente constituido "
-;;                (span (@ (class "o")) "o")
-;;                " poder constituyente derivado")))
-;;  (div (@ (class "field-name-field-sublema"))
-;;       (span (@ (class "sublema2"))
-;;             (a (@ (href "/lema/poder-judicial-de-la-federación"))
-;;                "poder judicial de la Federación")))
-;;  (div (@ (class "field-name-field-sublema"))
-;;       (span (@ (class "sublema2"))
-;;             (a (@ (href "/lema/poder-judicial-de-la-nación"))
-;;                "poder judicial de la Nación")))
-;;  (div (@ (class "field-name-field-sublema"))
-;;       (span (@ (class "sublema2"))
-;;             (a (@ (href "/lema/poder-especial-para-pleitos"))
-;;                "poder especial para pleitos")))
-;;  (div (@ (class "field-name-field-sublema"))
-;;       (span (@ (class "sublema2"))
-;;             (a (@ (href "/lema/poder-general-para-pleitos"))
-;;                "poder general para pleitos"))))
+(define pag-bruta (descargar-peticion "auto"))
+(define pagina-limpia (limpiar-pagina pag-bruta))
+(define el-articulo (extraer-articulo pagina-limpia))
+(define el-s-articulo (xml->sxml el-articulo))
 
 
-((node-or
-  (sxpath  '(// (div (@ class (equal? "field-name-field-rama")))))
-  (sxpath  '(// (div (@ class (equal? "field-name-field-definicion"))))))
- el-s-articulo)
+(define (write-the text filename)
+  (let* ((port (open-output-file filename)))
+    (if (list? text)
+	(pretty-print text port)
+	(display text port))
+    (close-port port)))
 
+(let* ((peticion-auto    (descargar-peticion "auto"))
+       (peticion-poder   (descargar-peticion "poder"))
+       (pag-limpia-auto  (limpiar-pagina peticion-auto))
+       (pag-limpia-poder (limpiar-pagina peticion-poder))
+       (art-auto         (extraer-articulo pag-limpia-auto))
+       (art-poder        (extraer-articulo pag-limpia-poder))
+       (s-auto		 (xml->sxml art-auto))
+       (s-poder		 (xml->sxml art-poder)))
+  
+  (write-the peticion-auto "peti-auto.html")
+  (write-the pag-limpia-auto   "limpio-auto.html")
+  (write-the art-auto      "art-auto.html")
+  (write-the s-auto	"s-auto.scm")
 
+  (write-the peticion-poder "peti-poder.html")
+  (write-the pag-limpia-poder   "limpio-poder.html")
+  (write-the art-poder      "art-poder.html")
+  (write-the s-poder	"s-poder.scm"))
 
-((node-pos 2) ((sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
-	       el-s-articulo))
-
-((node-join
-  (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
-  (sxpath  '(// (span (@ class (equal? "field-name-field-rama"))))))
- el-s-articulo)
-
-
-
-((node-or
-  (node-join
-   (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
-   (sxpath  '(// (span (@ class (equal? "field-name-field-rama"))))))
-  (node-join
-   (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
-   (sxpath  '(// (span (@ class (equal? "field-name-field-definicion")))))))
- el-s-articulo)
-
-
-((node-pos 3)
- ((node-or
-   (node-join
-    (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
-    (sxpath  '(// (span (@ class (equal? "field-name-field-rama"))))))
-   (node-join
-    (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
-    (sxpath  '(// (span (@ class (equal? "field-name-field-definicion")))))))
-  el-s-articulo))
-
-
-
-((node-reduce
-  (sxpath  '(// (span (@ class (equal? "field-name-field-rama")))))
-  (node-pos 2)) el-s-articulo)
-
-
-
-((node-or
-  (node-join
-   (node-reduce
-    (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
-    (node-pos 1))
-   (sxpath  '(// (span (@ class (equal? "field-name-field-rama"))))))
-  (node-join
-   (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
-   (sxpath  '(// (span (@ class (equal? "field-name-field-definicion")))))))
- el-s-articulo)
-
-((node-join
-  (node-reduce
-   (sxpath  '(// (div (@ class (equal? "cuerpo-lema")))))
-   (node-pos 1))
-  (node-reduce
-   (sxpath  '(// (span (@ class (equal? "field-name-field-rama")))))
-   (node-pos 1)))
- el-s-articulo)
-
-((node-reduce
-   (sxpath  '(// (div (@ class (equal? "field-name-field-sublema")))))
-   (node-pos 18)) el-s-articulo)
-
-
-(define (obtener-sublema1-href-pos articulo pos)
-  ((node-join
-    (node-reduce
-     (sxpath '(// (div (@ class (equal? "field-name-field-sublema")))))
-     (node-pos pos))
-    (node-join
-     (node-reduce
-      (sxpath '(// (span (@ class (equal? "sublema1")))))
-      (node-pos 1))
-     (node-join
-      (node-reduce
-       (sxpath '(// (a)))
-       (node-pos 1))
-      (sxpath '(// (@ (href)))))))
-   articulo))
