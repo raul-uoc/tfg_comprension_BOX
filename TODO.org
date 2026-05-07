@@ -1,0 +1,14 @@
+* Scrap [3/5]
+- [ ] Cambiar uso de librería curl por una que utiliza Gnu Guile
+- [X] Obtener definiciones
+- [X] Obtener lemas
+- [X] Obtener sublemas
+- [ ] Obtener sinónimos
+* Tesauro del panhispánico del español jurídico
+- Tiene lemas
+- Tiene sublemas
+- Marcas
+- Acepcciones
+- Relaciones de sinónimo
+* Bugs [/]
+- [ ] No se está eliminando styles correctamente 

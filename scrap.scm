@@ -8,7 +8,8 @@
 	     (web client)
 	     (ice-9 match)
 	     (ice-9 pretty-print)
-	     (tirones))
+	     (tirones)
+	     (printer))
 
 (define (descargar-peticion lema)
   (let* ((handle (curl-easy-init)))
@@ -48,17 +49,17 @@
 	 (to-utf-8 		(iso-to-utf-8 elimina-compartir)))
     to-utf-8))
 
-(define (obtener-definiciones s-articulo)
-  (let* ((campo-definiciones ((sxpath  '(// (span (@ class (equal? "field-name-field-definicion") ) ))) s-articulo))
-	 (las-definiciones ((select-kids string?) campo-definiciones)))
-    las-definiciones))
 
-
-(define pag-bruta (descargar-peticion "auto"))
+(define pag-bruta (descargar-peticion "delito-militar"))
 (define pagina-limpia (limpiar-pagina pag-bruta))
 (define el-articulo (extraer-articulo pagina-limpia))
 (define el-s-articulo (xml->sxml el-articulo))
 
+(define (buscar-lema lema)
+  (set! pag-bruta (descargar-peticion lema))
+  (set! pagina-limpia (limpiar-pagina pag-bruta))
+  (set! el-articulo (extraer-articulo pagina-limpia))
+  (set! el-s-articulo (xml->sxml el-articulo)))
 
 (define (write-the text filename)
   (let* ((port (open-output-file filename)))
@@ -76,13 +77,15 @@
        (s-auto		 (xml->sxml art-auto))
        (s-poder		 (xml->sxml art-poder)))
   
-  (write-the peticion-auto "peti-auto.html")
-  (write-the pag-limpia-auto   "limpio-auto.html")
-  (write-the art-auto      "art-auto.html")
-  (write-the s-auto	"s-auto.scm")
+  (write-the peticion-auto	"peti-auto.html")
+  (write-the pag-limpia-auto	"limpio-auto.html")
+  (write-the art-auto		"art-auto.html")
+  (write-the s-auto		"s-auto.scm")
 
-  (write-the peticion-poder "peti-poder.html")
-  (write-the pag-limpia-poder   "limpio-poder.html")
-  (write-the art-poder      "art-poder.html")
-  (write-the s-poder	"s-poder.scm"))
+  (write-the peticion-poder	"peti-poder.html")
+  (write-the pag-limpia-poder	"limpio-poder.html")
+  (write-the art-poder		"art-poder.html")
+  (write-the s-poder		"s-poder.scm"))
+
+
 
